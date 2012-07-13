@@ -1,6 +1,6 @@
 # **Docco** is a quick-and-dirty, hundred-line-long, literate-programming-style
-# documentation generator. It produces HTML that displays your comments
-# alongside your code. Comments are passed through
+# documentation generator. It produces HTML
+# that displays your comments alongside your code. Comments are passed through
 # [Markdown](http://daringfireball.net/projects/markdown/syntax), and code is
 # passed through [Pygments](http://pygments.org/) syntax highlighting.
 # This page is the result of running Docco against its own source file.
@@ -17,10 +17,13 @@
 #
 # To install Docco, first make sure you have [Node.js](http://nodejs.org/),
 # [Pygments](http://pygments.org/) (install the latest dev version of Pygments
-# from [its Mercurial repo](http://dev.pocoo.org/hg/pygments-main)), and
+# from [its Mercurial repo](https://bitbucket.org/birkenfeld/pygments-main)), and
 # [CoffeeScript](http://coffeescript.org/). Then, with NPM:
 #
-#     sudo npm install docco
+#     sudo npm install -g docco
+#
+# Docco can be used to process CoffeeScript, JavaScript, Ruby, Python, or TeX files.
+# Only single-line comments are processed -- block comments are ignored.
 #
 #### Partners in Crime:
 #
@@ -147,22 +150,10 @@ path     = require 'path'
 showdown = require('./../vendor/showdown').Showdown
 {spawn, exec} = require 'child_process'
 
-# A list of the languages that Docco supports, mapping the file extension to
-# the name of the Pygments lexer and the symbol that indicates a comment. To
-# add another language to Docco's repertoire, add it here.
-languages =
-  '.coffee':
-    name: 'coffee-script', symbol: '#'
-  '.js':
-    name: 'javascript', symbol: '//'
-  '.rb':
-    name: 'ruby', symbol: '#'
-  '.php':
-    name: 'php', symbol: '//'
-  '.fbp':
-    name: 'fbp', symbol: '#'
-  '.py':
-    name: 'python', symbol: '#'
+# Languages are stored in JSON format in the file `resources/languages.json`
+# Each item maps the file extension to the name of the Pygments lexer and the
+# symbol that indicates a comment. To add a new language, modify the file.
+languages = JSON.parse fs.readFileSync(__dirname + "/../resources/languages.json").toString()
 
 # Build out the appropriate matchers and delimiters for each language.
 for ext, l of languages
@@ -170,7 +161,7 @@ for ext, l of languages
   # Does the line begin with a comment?
   l.comment_matcher = new RegExp('^\\s*' + l.symbol + '\\s?')
 
-  # Ignore [hashbangs](http://en.wikipedia.org/wiki/Shebang_(Unix))
+  # Ignore [hashbangs](http://en.wikipedia.org/wiki/Shebang_(Unix\))
   # and interpolations...
   l.comment_filter = new RegExp('(^#![/]|^\\s*#\\{)')
 
